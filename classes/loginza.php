@@ -2,9 +2,11 @@
 
 class Loginza
 {
-    protected $api_url = 'http://loginza.ru/api/%method%';
-    protected $version = '1.0';
-    protected $widget_url = 'https://loginza.ru/api/widget';
+    protected $_api_url = 'http://loginza.ru/api/%method%';
+    protected $_version = '1.0';
+    protected $_widget_url = 'https://loginza.ru/api/widget';
+    protected $_widget_id;
+    protected $_widget_key;
 
     public static function factory()
     {
@@ -20,20 +22,28 @@ class Loginza
     {
         if ( ! empty($_POST['token'])) 
         {
-            $profile = $this->_get_auth_info($_POST['token']);
+            //безопасный режим
+            if ( ! empty($this->_widget_id) AND ! empty($this->_widget_key))
+            {
+                $profile = $this->_get_auth_info($_POST['token'], $this->_widget_id, md5($_POST['token'].$this->_widget_key));
+            }
+            else
+            {
+                $profile = $this->_get_auth_info($_POST['token'], $this->_widget_id, $this->_widget_key);
+            }
 
             if ( ! empty($profile['error_type'])) 
             {
                 // есть ошибки, выводим их
                 // в рабочем примере данные ошибки не следует выводить пользователю, так как они несут информационный характер только для разработчика
-                echo $profile['error_type'].": ".$profile['error_message'];
+                // echo $profile['error_type'].": ".$profile['error_message'];
 
                 return FALSE;
             }
             elseif (empty($profile)) 
             {
                 // прочие ошибки
-                echo 'Temporary error.';
+                // echo 'Temporary error.';
 
                 return FALSE;
             }
@@ -121,20 +131,20 @@ class Loginza
         return FALSE;
     }
 
-    protected function _get_auth_info($token)
+    protected function _get_auth_info($token, $id, $sig)
     {
-        return $this->_api_request('authinfo', array('token' => $token));
+        return $this->_api_request('authinfo', array('token' => $token, 'id' => $id, 'sig' => $sig));
     }
     
     protected function _api_request($method, $params) 
     {
         // url запрос
-        $url = str_replace('%method%', $method, $this->api_url).'?'.http_build_query($params);
+        $url = str_replace('%method%', $method, $this->_api_url).'?'.http_build_query($params);
 
         if ( function_exists('curl_init') ) 
         {
             $curl = curl_init($url);
-            $user_agent = 'LoginzaAPI'.$this->version.'/php'.phpversion();
+            $user_agent = 'LoginzaAPI'.$this->_version.'/php'.phpversion();
 
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($curl, CURLOPT_HEADER, FALSE);
@@ -176,7 +186,7 @@ class Loginza
             $params['overlay'] = $overlay;
         }
 
-        return $this->widget_url.'?'.http_build_query($params);
+        return $this->_widget_url.'?'.http_build_query($params);
     }
     
     private function _current_url() 
