@@ -9,9 +9,8 @@ return array
     'widget_key' => '',
     'mapping_paths' => array(
         'email' => 'email', 
-        'firstname' => 'name.firstname', 
-        'lastname' => 'name.lastname', 
-        'patronymic' => 'name.patronymic',
+        'firstname' => 'name.first_name', 
+        'lastname' => 'name.last_name', 
         'nickname' => 'nickname',
         'd_birthday' => 'dob',  
     ),

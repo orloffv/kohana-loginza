@@ -55,6 +55,7 @@ class Loginza
             else 
             {    
                 self::$profile = $profile;
+                
                 self::$error = FALSE;
             }
         }
