@@ -2,60 +2,89 @@
 
 class Loginza
 {
-    protected $_api_url = 'http://loginza.ru/api/%method%';
-    protected $_version = '1.0';
-    protected $_widget_url = 'https://loginza.ru/api/widget';
-    protected $_widget_id;
-    protected $_widget_key;
+	protected static $instance;
+    protected static $profile;
+    protected static $error = FALSE;
 
-    public static function factory()
+    public static function instance()
     {
-        return new self();
+        if ( ! isset(Loginza::$instance))
+		{
+            $config = Kohana::config('loginza');
+
+			Loginza::$instance = new self($config);
+		}
+
+		return Loginza::$instance;
     }
     
-    public function __construct()
-    {
+    public function __construct($config = array())
+	{
+		$this->config = $config;
         
-    }
+		$this->session = Session::instance();
+	}
     
-    public function check()
+    public function check($token = NULL)
     {
-        if ( ! empty($_POST['token'])) 
+        if (is_null($token))
+        {
+            $token = Arr::get($_POST, 'token', FALSE);
+        }
+        
+        if ( ! empty($token)) 
         {
             //безопасный режим
-            if ( ! empty($this->_widget_id) AND ! empty($this->_widget_key))
+            if ( ! empty($this->config->widget_id) AND ! empty($this->config->widget_key))
             {
-                $profile = $this->_get_auth_info($_POST['token'], $this->_widget_id, md5($_POST['token'].$this->_widget_key));
+                $profile = $this->_get_auth_info($token, $this->config->widget_id, md5($token.$this->config->widget_key));
             }
             else
             {
-                $profile = $this->_get_auth_info($_POST['token'], $this->_widget_id, $this->_widget_key);
+                $profile = $this->_get_auth_info($token, $this->config->widget_id, $this->config->widget_key);
             }
 
             if ( ! empty($profile['error_type'])) 
             {
-                // есть ошибки, выводим их
-                // в рабочем примере данные ошибки не следует выводить пользователю, так как они несут информационный характер только для разработчика
-                // echo $profile['error_type'].": ".$profile['error_message'];
-
-                return FALSE;
+                self::$error = $profile['error_message'];
             }
             elseif (empty($profile)) 
             {
-                // прочие ошибки
-                // echo 'Temporary error.';
-
-                return FALSE;
+                self::$error = 'Temporary error';
             }
             else 
             {    
-                $profile = $this->_parse_profile($profile);
-
-                return $profile;
+                self::$profile = $profile;
+                self::$error = FALSE;
             }
         }
+        else
+        {
+            self::$error = 'not token';
+        }
 
-        return FALSE;
+        return $this;
+    }
+    
+    public function get_profile()
+    {
+        if (self::$error)
+        {
+            throw new Exception_Loginza(self::$error);
+        }
+        
+        $data = $this->_parse_profile(self::$profile);
+        
+        return $data;
+    }
+    
+    public function get_clear_profile()
+    {
+        $data = $this->get_profile();
+        
+        $data['profile'] = $this->_get_mappings($data['profile']);
+        
+        return $data;
     }
     
     protected function _parse_profile($profile)
@@ -67,10 +96,32 @@ class Loginza
         );
 
         $profile = Arr::merge($profile, $array);
-
-        return $profile;
+        
+        $system = array(
+            'identity' => $profile['identity'],
+            'provider' => $profile['provider']
+        );
+        
+        unset($profile['identity'], $profile['provider']);
+        
+        return array('profile' => $profile, 'system' => $system);
     }
     
+    protected function _get_mappings($profile)
+    {
+        $return_array = array();
+        
+        foreach ($this->config->mapping_paths as $key => $path)
+        {
+            if (($find = Arr::path($profile, $path)))
+            {
+                $return_array[$key] = $find;
+            }
+        }
+        
+        return $return_array;
+    }
+
     protected function _gen_site($profile)
     {
         if (isset($profile['web']['blog']) AND ! empty($profile['web']['blog'])) 
@@ -139,12 +190,12 @@ class Loginza
     protected function _api_request($method, $params) 
     {
         // url запрос
-        $url = str_replace('%method%', $method, $this->_api_url).'?'.http_build_query($params);
+        $url = str_replace('%method%', $method, $this->config->api_url).'?'.http_build_query($params);
 
         if ( function_exists('curl_init') ) 
         {
             $curl = curl_init($url);
-            $user_agent = 'LoginzaAPI'.$this->_version.'/php'.phpversion();
+            $user_agent = 'LoginzaAPI'.$this->config->version.'/php'.phpversion();
 
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
             curl_setopt($curl, CURLOPT_HEADER, FALSE);
@@ -186,7 +237,7 @@ class Loginza
             $params['overlay'] = $overlay;
         }
 
-        return $this->_widget_url.'?'.http_build_query($params);
+        return $this->config->widget_url.'?'.http_build_query($params);
     }
     
     private function _current_url() 
