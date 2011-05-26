@@ -2,23 +2,24 @@
 
 class Loginza_Core
 {
-    protected static $instance;
     protected static $profile;
     protected static $error = FALSE;
 
     public static function instance()
     {
-        if ( ! isset(Loginza::$instance))
+        static $instance = NULL;
+        
+        if ($instance == NULL)
         {
             $config = Kohana::config('loginza');
 
-            Loginza::$instance = new self($config);
+            $instance = new self($config);
         }
 
-        return Loginza::$instance;
+        return $instance;
     }
     
-    public function __construct($config = array())
+    protected function __construct($config = array())
     {
         $this->config = $config;
 
