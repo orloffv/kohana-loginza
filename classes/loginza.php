@@ -215,28 +215,17 @@ class Loginza
         return json_decode($responce, TRUE);
     }
     
-    public function get_widget_url($return_url = NULL, $provider = NULL, $overlay='') 
+    public function get_widget_url($settings = array()) 
     {
         $params = array();
 
-        if ( ! $return_url) 
-        {
-            $params['token_url'] = $this->_current_url();
-        }
-        else 
-        {
-            $params['token_url'] = $return_url;
-        }
-
-        if ($provider) 
-        {
-            $params['provider'] = $provider;
-        }
-
-        if ($overlay) 
-        {
-            $params['overlay'] = $overlay;
-        }
+        $params['token_url'] = Arr::get($settings, 'token_url', $this->_current_url());
+        
+        $params['provider'] = Arr::get($settings, 'provider', '');
+        
+        $params['overlay'] = Arr::get($settings, 'overlay', '');
+        
+        $params['theme'] = Arr::get($settings, 'theme', '');
 
         return $this->config->widget_url.'?'.http_build_query($params);
     }
