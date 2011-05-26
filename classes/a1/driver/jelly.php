@@ -49,19 +49,4 @@ abstract class A1_Driver_Jelly extends A1 {
         
 		return $query;
 	}
-    
-    public function login_loginza($provider, $identity, $remember = FALSE)
-    {
-        if (empty($provider) OR empty($identity))
-        {
-            return FALSE;
-        }
-        
-        $user = $this->_load_user_loginza($provider, $identity);
-        
-        if ( $user->loaded())
-		{
-            return $this->complete_login($user,$remember);
-		}
-    }
 }
