@@ -10,7 +10,7 @@ abstract class A1_Driver_Jelly extends A1 {
     protected function _load_user_loginza($provider, $identity)
 	{
         $query = Jelly::select($this->_config['user_model'])
-                ->join('loginza')->on('loginza.'.$this->_config['user_model'].'_id', '=', $this->_config['user_model'].'_id')
+                ->join('loginza')->on('loginza.'.$this->_config['user_model'].'_id', '=', $this->_config['user_model'].'.id')
                 ->where('loginza.provider', '=', $provider)->where('loginza.identity', '=', $identity);
 
         if (isset($this->_config['columns']['active']))
@@ -18,9 +18,7 @@ abstract class A1_Driver_Jelly extends A1 {
             $query = $query->where($this->_config['columns']['active'], '=', TRUE);
         }
 
-        $query = $query->limit(1)->execute();
-        
-		return $query;
+        return $query->limit(1)->execute();
 	}
     
     public function login_loginza($provider, $identity, $remember = FALSE)
