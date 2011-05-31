@@ -6,24 +6,21 @@ class Model_Loginza extends Jelly_Model {
     {
         $meta->table('loginza')
             ->fields(array(
-                'id' => new Field_Primary,
-                'identity' => new Field_String(array(
+                'id' => Jelly::field('primary'),
+                'identity' => Jelly::field('string', array(
                     'label' => __('Identity'),
                     'rules' => array(
-                        'not_empty' => NULL,
+                        array('not_empty'),
                     )
                 )),
-                'provider' => new Field_String(array(
+                'provider' => Jelly::field('string', array(
                     'label' => __('Provider'),
                     'rules' => array(
-                        'not_empty' => NULL,
+                        array('not_empty'),
                     )
                 )),
-                'dt_create' => new Field_Timestamp(array(
-                    'auto_now_create' => TRUE,
-                    'format' => 'Y-m-d H:i:s',
-                )),
-                'member_id' => new Field_Integer,
+                'dt_create' => Jelly::field('my_dtcreate'),
+                'member_id' => Jelly::field('integer'),
             ));
     }
     
@@ -31,7 +28,7 @@ class Model_Loginza extends Jelly_Model {
     {
         $insert = Arr::merge($system, array('member_id' => $member_id));
         
-        Jelly::factory('loginza', $insert)->save();
+        return Jelly::factory('loginza')->set($insert)->save();
     }
     
     public static function signin($system, $remember = FALSE)
@@ -54,7 +51,7 @@ class Model_Loginza extends Jelly_Model {
             $data['active'] = TRUE;
         }
 
-        $member = Jelly::factory($this->module_name, $data)->save();
+        $member = Jelly::factory('member')->set($data)->save();
 
         if ($member->saved())
         {
@@ -62,7 +59,7 @@ class Model_Loginza extends Jelly_Model {
 
             Model_Loginza::add_provider($member->id, $loginza_data['system']);
 
-            if ( ! $_POST['active'])
+            if ( ! $data['active'])
             {
                 self::emailactivate($member->id, $member->email);
             }

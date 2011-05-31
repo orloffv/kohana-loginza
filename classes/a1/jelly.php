@@ -4,12 +4,20 @@ class A1_Jelly extends A1_Driver_Jelly {
     
     protected function _load_user($username)
     {
-        return parent::_load_user($username);
+        $query = Jelly::query($this->_config['user_model'])
+			->where($this->_config['columns']['username'], '=', $username);
+
+		if (isset($this->_config['columns']['active']))
+		{
+			$query = $query->where($this->_config['columns']['active'], '=', TRUE);
+		}
+
+		return $query->limit(1)->execute();
     }
 
     protected function _load_user_loginza($provider, $identity)
 	{
-        $query = Jelly::select($this->_config['user_model'])
+        $query = Jelly::query($this->_config['user_model'])
                 ->join('loginza')->on('loginza.'.$this->_config['user_model'].'_id', '=', $this->_config['user_model'].'.id')
                 ->where('loginza.provider', '=', $provider)->where('loginza.identity', '=', $identity);
 
