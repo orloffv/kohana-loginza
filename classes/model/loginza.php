@@ -107,6 +107,8 @@ class Model_Loginza extends Jelly_Model {
 
             Model_Loginza::add_provider($member->id, $loginza_data['system']);
 
+            Model_Loginza::signin($loginza_data['system']);
+            
             if ( ! $data['active'])
             {
                 self::emailactivate($member->id, $member->email);
