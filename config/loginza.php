@@ -14,4 +14,14 @@ return array
         'nickname' => 'nickname',
         'd_birthday' => 'dob',  
     ),
+    'detect_provides' => array(
+        'google'    => 'https://www.google.com/accounts/o8/ud',
+        'yandex'    => 'http://openid.yandex.ru/server/',
+        'vkontakte' => 'http://vkontakte.ru/',
+        'mail_ru'   => 'http://mail.ru/',
+        'facebook'  => 'http://www.facebook.com/',
+        'twitter'   => 'http://twitter.com/',
+        'steam'     => 'https://steamcommunity.com/openid/login',
+        'last_fm'   => 'http://www.last.fm/'
+    ),
 );

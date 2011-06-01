@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Loginza_Core
+class Kohana_Loginza
 {
     protected static $profile;
     protected static $error = FALSE;
