@@ -111,7 +111,7 @@ class Model_Loginza extends Jelly_Model {
             
             if ( ! $data['active'])
             {
-                self::emailactivate($member->id, $member->email);
+                Model_Member::emailactivate($member->id, $member->email);
             }
         }
         
