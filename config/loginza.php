@@ -7,6 +7,7 @@ return array
     'widget_url' => 'https://loginza.ru/api/widget',
     'widget_id' => '',
     'widget_key' => '',
+    'user_model' => 'member',
     'mapping_paths' => array(
         'email' => 'email', 
         'firstname' => 'name.first_name', 
