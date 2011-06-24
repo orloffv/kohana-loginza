@@ -44,4 +44,10 @@ class A1_Jelly extends A1_Driver_Jelly {
 		}
     }
     
+    public function update_user($user)
+    {
+        $new_user = $this->_load_user($user->email);
+        $this->complete_login($new_user, TRUE);
+    }
+    
 }
