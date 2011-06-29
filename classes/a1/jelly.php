@@ -50,4 +50,14 @@ class A1_Jelly extends A1_Driver_Jelly {
         $this->complete_login($new_user, TRUE);
     }
     
+    public function check($password, $hash)
+	{
+        if ( ! $hash)
+        {
+            return FALSE;
+        }
+        
+        return parent::check($password, $hash);
+    }
+    
 }
