@@ -66,7 +66,7 @@ class Model_Loginza extends Jelly_Model {
             }
             else
             {
-                return array('provider' => 'Нужен хотябы один метод авторизации');
+                return array('error' => 'Нужен хотябы один метод авторизации');
             }
         }
         catch (Jelly_Validation_Exception $e)
